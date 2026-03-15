@@ -1,85 +1,112 @@
-import { UserRole } from '@prisma/client';
-import { Request } from 'express';
+import { Request } from "express";
+import { UserRole } from "@prisma/client";
 
-// Authenticated user payload attached to requests
+/*
+|--------------------------------------------------------------------------
+| User Roles
+|--------------------------------------------------------------------------
+*/
+
+export { UserRole };
+
+/*
+|--------------------------------------------------------------------------
+| Auth Types
+|--------------------------------------------------------------------------
+*/
+
 export interface AuthUser {
   userId: string;
-  email: string;
   companyId: string;
   role: UserRole;
+  email?: string;
 }
 
-// Extend Express Request
 export interface AuthenticatedRequest extends Request {
   user?: AuthUser;
 }
 
-// API response envelope
+/*
+|--------------------------------------------------------------------------
+| API Response
+|--------------------------------------------------------------------------
+*/
+
 export interface ApiResponse<T = any> {
   success: boolean;
+  message?: string;
   data?: T;
   error?: string;
-  message?: string;
-  meta?: {
-    page?: number;
-    limit?: number;
-    total?: number;
-  };
+  meta?: any;
 }
 
-// Document upload metadata
-export interface DocumentUploadMeta {
-  title: string;
-  description?: string;
-  tags?: string[];
-  isConfidential?: boolean;
-}
+/*
+|--------------------------------------------------------------------------
+| Security Scan
+|--------------------------------------------------------------------------
+*/
 
-// RAG query request
-export interface RAGQueryRequest {
-  query: string;
-  topK?: number;
-  includeSource?: boolean;
-}
-
-// RAG query response
-export interface RAGQueryResponse {
-  answer: string;
-  sources: RAGSource[];
-  tokensUsed: number;
-  latencyMs: number;
-}
-
-// Source document reference
-export interface RAGSource {
-  documentId: string;
-  documentTitle: string;
-  chunkContent: string;
-  chunkIndex: number;
-  relevanceScore: number;
-}
-
-// Chunk metadata stored in vector DB
-export interface ChunkMetadata {
-  tenantId: string;
-  documentId: string;
-  documentTitle: string;
-  chunkId: string;
-  chunkIndex: number;
-  isConfidential: boolean;
-}
-
-// Security scan result
 export interface SecurityScanResult {
+  safe?: boolean;
   isSafe: boolean;
   threats: string[];
+  issues?: string[];
   sanitizedInput?: string;
 }
 
-// Pagination params
-export interface PaginationParams {
+/*
+|--------------------------------------------------------------------------
+| RAG Source
+|--------------------------------------------------------------------------
+*/
+
+export interface RAGSource {
+  documentId: string;
+  documentName?: string;
+  documentTitle?: string;
+  chunk?: string;
+  chunkContent?: string;
+  chunkIndex?: number;
+  relevanceScore?: number;
+}
+
+/*
+|--------------------------------------------------------------------------
+| RAG Query Response
+|--------------------------------------------------------------------------
+*/
+
+export interface RAGQueryResponse {
+  answer: string;
+  sources: RAGSource[];
+  tokensUsed?: number;
+  latencyMs?: number;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Vector Metadata
+|--------------------------------------------------------------------------
+*/
+
+export interface ChunkMetadata {
+  documentId: string;
+  tenantId?: string;
+  companyId?: string;
+  documentTitle?: string;
+  chunkId?: string;
+  chunkIndex?: number;
+  source?: string;
+  isConfidential?: boolean;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Pagination
+|--------------------------------------------------------------------------
+*/
+
+export interface Pagination {
   page: number;
   limit: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
 }

@@ -43,10 +43,10 @@ export class VectorStore {
         embeddings: batchEmbeddings,
         documents: batchChunks.map((c) => c.content),
         metadatas: batchChunks.map((c) => ({
-          tenantId: c.metadata.tenantId,
+          tenantId: c.metadata.tenantId || '',
           documentId: c.metadata.documentId,
-          documentTitle: c.metadata.documentTitle,
-          chunkIndex: c.metadata.chunkIndex,
+          documentTitle: c.metadata.documentTitle || '',
+          chunkIndex: c.metadata.chunkIndex ?? 0,
           isConfidential: c.metadata.isConfidential ? 'true' : 'false',
         })),
       });
