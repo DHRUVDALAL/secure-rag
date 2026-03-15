@@ -1,0 +1,11 @@
+SecureRAG is an enterprise-grade Retrieval Augmented Generation system.
+
+It allows organizations to securely query internal documents using large language models.
+
+SecureRAG includes several security features:
+- Prompt injection detection
+- PII masking
+- Role-based access control
+- Tenant isolation
+
+The system uses vector search to retrieve relevant document chunks before generating answers.

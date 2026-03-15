@@ -1,0 +1,7 @@
+Company Handbook
+
+Employees must follow internal security policies.
+
+SecureRAG is used internally to search company knowledge bases.
+
+All employees should upload documents into the SecureRAG system so they can be queried using AI.s

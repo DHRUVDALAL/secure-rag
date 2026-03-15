@@ -1,0 +1,11 @@
+AI Security Policy
+
+All AI systems must protect sensitive data.
+
+SecureRAG automatically detects prompt injection attempts.
+It blocks queries that attempt to override system instructions.
+
+The platform also masks personally identifiable information such as:
+- phone numbers
+- credit cards
+- email addressess

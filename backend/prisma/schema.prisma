@@ -1,0 +1,175 @@
+// ============================================================================
+// SecureRAG - Prisma Database Schema
+// Multi-tenant secure RAG platform with RBAC
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// Enums
+// ============================================================================
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum DocumentType {
+  PDF
+  DOCX
+  TXT
+  MARKDOWN
+}
+
+// ============================================================================
+// Companies (Tenants)
+// ============================================================================
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  domain    String?
+  plan      String   @default("free")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  documents Document[]
+  queryLogs QueryLog[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("companies")
+}
+
+// ============================================================================
+// Users
+// ============================================================================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole @default(EMPLOYEE)
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  documents Document[]
+  queryLogs QueryLog[]
+
+  @@unique([email, companyId])
+  @@index([companyId])
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+// ============================================================================
+// Documents
+// ============================================================================
+
+model Document {
+  id          String         @id @default(uuid())
+  title       String
+  fileName    String
+  fileSize    Int
+  mimeType    String
+  type        DocumentType
+  status      DocumentStatus @default(PENDING)
+  chunkCount  Int            @default(0)
+  description String?
+  tags        String[]       @default([])
+  isConfidential Boolean     @default(false)
+  errorMessage   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  companyId  String
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+
+  chunks DocumentChunk[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([companyId, status])
+  @@index([type])
+  @@map("documents")
+}
+
+// ============================================================================
+// Document Chunks
+// ============================================================================
+
+model DocumentChunk {
+  id         String @id @default(uuid())
+  content    String
+  chunkIndex Int
+  metadata   Json   @default("{}")
+  tokenCount Int    @default(0)
+  createdAt  DateTime @default(now())
+
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([chunkIndex])
+  @@map("document_chunks")
+}
+
+// ============================================================================
+// Query Logs (Audit Trail)
+// ============================================================================
+
+model QueryLog {
+  id             String   @id @default(uuid())
+  query          String
+  response       String?
+  sourceDocs     Json     @default("[]")
+  tokenCount     Int      @default(0)
+  latencyMs      Int      @default(0)
+  isSuspicious   Boolean  @default(false)
+  suspiciousReason String?
+  blocked        Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([isSuspicious])
+  @@index([createdAt])
+  @@index([companyId, createdAt])
+  @@map("query_logs")
+}
