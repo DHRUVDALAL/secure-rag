@@ -11,6 +11,9 @@ import { logger } from './utils/logger';
 
 const app = express();
 
+/* TRUST PROXY (FIX FOR RENDER) */
+app.set('trust proxy', 1);
+
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -42,6 +45,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, error: 'Too many requests, please try again later' },
 });
+
 app.use('/api/', limiter);
 
 // Body parsing
@@ -68,7 +72,7 @@ app.get('/health', (_req, res) => {
 app.use('/api', routes);
 
 // ============================================================================
-// Error Handler (must be last)
+// Error Handler
 // ============================================================================
 
 app.use(errorHandler);
