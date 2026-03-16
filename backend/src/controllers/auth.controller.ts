@@ -19,6 +19,12 @@ const loginSchema = z.object({
 export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
+      if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Request body is empty. Ensure you are sending JSON with Content-Type: application/json header and using the https:// URL (not http://).',
+        });
+      }
       const data = registerSchema.parse(req.body);
       const result = await authService.registerCompany(data);
       sendSuccess(res, result, 'Company registered successfully', 201);
